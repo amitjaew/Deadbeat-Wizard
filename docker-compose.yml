@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+    manager_db:
+        image: "mysql"
+        environment:
+            - "MYSQL_ROOT_PASSWORD=root-pw"
+            - "MYSQL_USER=admin"
+            - "MYSQL_PASSWORD=password"
+            - "MYSQL_DATABASE=deadbeat-wizard"
+        volumes:
+            - ./_db_init:/docker-entrypoint-initdb.d
+        ports:
+            - "3306:3306"
