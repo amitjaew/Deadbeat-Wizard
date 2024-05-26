@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS wordlists (
     id BIGINT NOT NULL AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
     description VARCHAR(1024) NOT NULL,
+    file BLOB NOT NULL,
     PRIMARY KEY(id)
 );
 

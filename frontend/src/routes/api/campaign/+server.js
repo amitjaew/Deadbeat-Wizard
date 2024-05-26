@@ -10,9 +10,16 @@ export async function POST({ request }) {
             [name, description]
         );
 
-        return json({ success: true, message: 'Campaign created successfully', result });
+        return json({
+            success: true,
+            message: 'Campaign created successfully',
+            result
+        });
     } catch (err) {
-        return error(err.status || 500, err.message || 'Internal Server Error');
+        return error(
+            err.status || 500,
+            err.message || 'Internal Server Error'
+        );
     }
 }
 
@@ -30,9 +37,15 @@ export async function GET({ request }) {
 
         const result = await queryDatabase(query, params);
 
-        return json({ success: true, data: result });
+        return json({
+            success: true,
+            data: result
+        });
     } catch (err) {
-        return error(err.status || 500, err.message || 'Internal Server Error');
+        return error(
+            err.status || 500,
+            err.message || 'Internal Server Error'
+        );
     }
 }
 
@@ -45,9 +58,16 @@ export async function PATCH({ request }) {
             [name, description, id]
         );
 
-        return json({ success: true, message: 'Campaign updated successfully', result });
+        return json({
+            success: true,
+            message: 'Campaign updated successfully',
+            result
+        });
     } catch (err) {
-        return error(err.status || 500, err.message || 'Internal Server Error');
+        return error(
+            err.status || 500,
+            err.message || 'Internal Server Error'
+        );
     }
 }
 
@@ -55,11 +75,21 @@ export async function DELETE({ request }) {
     try {
         const { id } = JSON.parse(request.body);
 
-        const result = await queryDatabase(`DELETE FROM campaigns WHERE id = ?`, id);
+        const result = await queryDatabase(
+            `DELETE FROM campaigns WHERE id = ?`,
+            id
+        );
 
-        return json({ success: true, message: 'Campaign deleted successfully', result });
+        return json({
+            success: true,
+            message: 'Campaign deleted successfully',
+            result
+        });
     } catch (err) {
-        return error(err.status || 500, err.message || 'Internal Server Error');
+        return error(
+            err.status || 500,
+            err.message || 'Internal Server Error'
+        );
     }
 }
 

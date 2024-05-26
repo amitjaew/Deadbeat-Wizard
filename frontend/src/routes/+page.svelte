@@ -5,7 +5,7 @@
             <div class="flex flex-col justify-center gap-y-2 uppercase tracking-tigh font-bold">
                 <a
                     class="btn variant-filled-primary hover:tracking-widest transition-all"
-                    href="/sniffer"
+                    href="/campaigns"
                 >
                     Campaigns
                 </a>
