@@ -1,0 +1,19 @@
+{
+    "manifest_version": 2,
+    "name": "Deadbeat Wizard",
+    "version": "0.1.0",
+    "description": "Deadbeat Wizard Browser Sniffer",
+    "browser_action": {
+        "default_title": "Deadbeat Wizard Browser Sniffer",
+        "default_popup": "index.html"
+    },
+    "permissions": [
+        "storage",
+        "webRequest",
+        "webRequestBlocking",
+        "https://*/*"
+    ],
+    "background": {
+        "scripts": [ "background.js" ]
+    }
+}
