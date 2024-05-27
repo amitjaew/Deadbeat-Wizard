@@ -5,15 +5,22 @@ const queue = [];
 
 const sendToApp = async (
     campaignId,
+    url,
     method,
+    type,
     headers,
     body
 ) => {
     const data = {
         campaign_id: campaignId,
+        url: url,
         method: method,
+        type: type,
         headers: headers,
-        body: body
+        body: body,
+        r_headers: [],
+        r_body: '',
+        r_status: ''
     };
 
     let r = await fetch(`${APP_URL}/capture`, {
@@ -35,15 +42,19 @@ const listenerBeforeHeaders = (intercept) => {
     );
     let isComplete = request ? true : false;
     if (! request) request = {};
-
-    request.headers = intercept.requestHeaders;
+    
+    const unparsedHeaders = Array.from(intercept.requestHeaders);
+    const parsedHeaders = unparsedHeaders.map(h => Object.fromEntries(h));
+    request.headers = parsedHeaders;
     request.method = intercept.method;
     request.type = intercept.type;
     request.url = intercept.url;
     if (isComplete) {
         sendToApp(
             1,
+            request.url,
             request.method,
+            request.type,
             request.headers,
             request.body
         );
@@ -62,14 +73,30 @@ const listenerBeforeRequest = (intercept) => {
     let isComplete = request ? true : false;
     if (! request) request = {};
 
-    request.body = intercept.requestBody;
+    const unparsedBody = intercept.requestBody;
+    request.body = {};
+
+    if (unparsedBody.formData){
+        request.body.formData = unparsedBody.formData;
+    }
+    if (unparsedBody.raw) {
+        let parsedRaw = '';
+        const decoder = new TextDecoder();
+        for (const chunk in unparsedBody.raw){
+            parsedRaw += decoder.decode(chunk);
+        }
+        request.body.raw = parsedRaw;
+    }
+
     request.method = intercept.method;
     request.type = intercept.type;
     request.url = intercept.url;
     if (isComplete) {
         sendToApp(
             1,
+            request.url,
             request.method,
+            request.type,
             request.headers,
             request.body
         );
