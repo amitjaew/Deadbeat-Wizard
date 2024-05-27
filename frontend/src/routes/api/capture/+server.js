@@ -5,7 +5,9 @@ export async function POST({ request }) {
     try {
         const {
             campaign_id,
+            url,
             method,
+            type,
             headers,
             body,
             r_headers,
@@ -16,17 +18,21 @@ export async function POST({ request }) {
         const result = await queryDatabase(
             `INSERT INTO captures (
                 campaign_id,
+                url,
                 method,
+                type,
                 headers,
                 body,
                 r_headers,
                 r_body,
                 r_status
             ) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 campaign_id,
+                url,
                 method,
+                type,
                 JSON.stringify(headers),
                 JSON.stringify(body),
                 JSON.stringify(r_headers),
@@ -73,7 +79,9 @@ export async function PATCH({ request }) {
         const { 
             id,
             campaign_id,
+            url,
             method,
+            type,
             headers,
             body,
             r_headers,
@@ -84,7 +92,9 @@ export async function PATCH({ request }) {
         const result = await queryDatabase(
             `UPDATE captures SET 
                 campaign_id = ?,
+                url = ?,
                 method = ?,
+                type = ?,
                 headers = ?,
                 body = ?,
                 r_headers = ?,
@@ -93,7 +103,9 @@ export async function PATCH({ request }) {
             WHERE id = ?`,
             [
                 campaign_id,
+                url,
                 method,
+                type,
                 JSON.stringify(headers),
                 JSON.stringify(body),
                 JSON.stringify(r_headers),

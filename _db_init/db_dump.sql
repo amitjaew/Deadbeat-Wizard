@@ -16,7 +16,9 @@ CREATE TABLE IF NOT EXISTS wordlists (
 CREATE TABLE IF NOT EXISTS captures (
     id BIGINT NOT NULL AUTO_INCREMENT,
     campaign_id BIGINT,
+    url VARCHAR(4096),
     method VARCHAR(128),
+    type VARCHAR(1024),
     headers JSON,
     body TEXT,
     r_headers JSON,
