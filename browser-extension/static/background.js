@@ -22,7 +22,9 @@ const sendToApp = async (
         r_body: '',
         r_status: ''
     };
-
+    
+    console.log('REQUEST', data);
+    return;
     let r = await fetch(`${APP_URL}/capture`, {
         method: 'POST',
         body: JSON.stringify(data),
@@ -35,8 +37,9 @@ const sendToApp = async (
 };
 
 const listenerBeforeHeaders = (intercept) => {
-    console.log('INTERCEPT HEADERS');
-    console.log(intercept);
+    if (intercept.method.toLowerCase() !== 'post') return;
+    //console.log('INTERCEPT HEADERS');
+    //console.log(intercept);
     let request = queue.find(
         r => r.requestId === intercept.requestId
     );
@@ -44,8 +47,10 @@ const listenerBeforeHeaders = (intercept) => {
     if (! request) request = {};
     
     const unparsedHeaders = Array.from(intercept.requestHeaders);
-    const parsedHeaders = unparsedHeaders.map(h => Object.fromEntries(h));
-    request.headers = parsedHeaders;
+    //const parsedHeaders = unparsedHeaders.map(h => Object.fromEntries(h));
+    //request.headers = parsedHeaders;
+    request.requestId = intercept.requestId;
+    request.headers = unparsedHeaders;
     request.method = intercept.method;
     request.type = intercept.type;
     request.url = intercept.url;
@@ -65,8 +70,9 @@ const listenerBeforeHeaders = (intercept) => {
 };
 
 const listenerBeforeRequest = (intercept) => {
-    console.log('INTERCEPT REQUEST');
-    console.log(intercept);
+    if (intercept.method.toLowerCase() !== 'post') return;
+    //console.log('INTERCEPT REQUEST');
+    //console.log(intercept);
     let request = queue.find(
         r => r.requestId === intercept.requestId
     );
@@ -76,18 +82,27 @@ const listenerBeforeRequest = (intercept) => {
     const unparsedBody = intercept.requestBody;
     request.body = {};
 
-    if (unparsedBody.formData){
+    if (unparsedBody && unparsedBody.formData){
         request.body.formData = unparsedBody.formData;
     }
-    if (unparsedBody.raw) {
+    if (unparsedBody && unparsedBody.raw) {
         let parsedRaw = '';
-        const decoder = new TextDecoder();
+        console.log('PARSING', unparsedBody.raw);
+        const decoder = new TextDecoder('utf-8');
+        parsedRaw = decodeURIComponent(String.fromCharCode.apply(null,
+                                      new Uint8Array(unparsedBody.raw[0].bytes)));
+
+        /*
         for (const chunk in unparsedBody.raw){
-            parsedRaw += decoder.decode(chunk);
-        }
+            let bytes = new Uint8Array(chunk.bytes);
+            console.log('bytes:', bytes);
+            parsedRaw += decoder.decode(bytes, {stream: true});
+        }*/
+        console.log('PARSED', parsedRaw);
         request.body.raw = parsedRaw;
     }
 
+    request.requestId = intercept.requestId;
     request.method = intercept.method;
     request.type = intercept.type;
     request.url = intercept.url;
@@ -118,7 +133,7 @@ browser.webRequest.onBeforeSendHeaders.addListener(
 browser.webRequest.onBeforeRequest.addListener(
     listenerBeforeRequest,             //  function
     {
-        urls: ['https://*/*']
+        urls: ['https://*/*'],
     },
     ["blocking", "requestBody"]
 );
