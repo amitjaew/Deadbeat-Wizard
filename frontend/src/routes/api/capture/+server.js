@@ -48,7 +48,8 @@ export async function POST({ request }) {
 
 export async function GET({ request }) {
     try {
-        const { id } = JSON.parse(request.body);
+        //const { id } = await request.json();
+        let id = null;
 
         let query = `SELECT * FROM captures`;
         let params = [];
