@@ -2,6 +2,7 @@ import { queryDatabase } from '$lib/db';
 import { error, json } from '@sveltejs/kit';
 
 export async function POST({ request }) {
+    console.log('RECEIVING', request);
     try {
         const {
             campaign_id,
@@ -9,11 +10,8 @@ export async function POST({ request }) {
             method,
             type,
             headers,
-            body,
-            r_headers,
-            r_body,
-            r_status
-        } = JSON.parse(request.body);
+            body
+        } = await request.json();
 
         const result = await queryDatabase(
             `INSERT INTO captures (
@@ -22,12 +20,9 @@ export async function POST({ request }) {
                 method,
                 type,
                 headers,
-                body,
-                r_headers,
-                r_body,
-                r_status
+                body
             ) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            VALUES (?, ?, ?, ?, ?, ?)`,
             [
                 campaign_id,
                 url,
@@ -35,9 +30,6 @@ export async function POST({ request }) {
                 type,
                 JSON.stringify(headers),
                 JSON.stringify(body),
-                JSON.stringify(r_headers),
-                JSON.stringify(r_body),
-                r_status
             ]
         );
 

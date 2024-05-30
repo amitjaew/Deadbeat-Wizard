@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_URL = 'http://127.0.0.1:5173/api';
+const APP_URL = 'http://localhost:5173/api';
 const queue = [];
 
 const sendToApp = async (
@@ -17,14 +17,10 @@ const sendToApp = async (
         method: method,
         type: type,
         headers: headers,
-        body: body,
-        r_headers: [],
-        r_body: '',
-        r_status: ''
+        body: body
     };
     
     console.log('REQUEST', data);
-    return;
     let r = await fetch(`${APP_URL}/capture`, {
         method: 'POST',
         body: JSON.stringify(data),
@@ -32,6 +28,7 @@ const sendToApp = async (
             'Access-Control-Allow-Origin': '*'
         }
     });
+    console.log('API response', r);
     r = r.json();
     return r;
 };
@@ -46,17 +43,15 @@ const listenerBeforeHeaders = (intercept) => {
     let isComplete = request ? true : false;
     if (! request) request = {};
     
-    const unparsedHeaders = Array.from(intercept.requestHeaders);
-    //const parsedHeaders = unparsedHeaders.map(h => Object.fromEntries(h));
-    //request.headers = parsedHeaders;
+    const parsedHeaders = Array.from(intercept.requestHeaders);
     request.requestId = intercept.requestId;
-    request.headers = unparsedHeaders;
+    request.headers = parsedHeaders;
     request.method = intercept.method;
     request.type = intercept.type;
     request.url = intercept.url;
     if (isComplete) {
         sendToApp(
-            1,
+            null,
             request.url,
             request.method,
             request.type,
@@ -86,19 +81,12 @@ const listenerBeforeRequest = (intercept) => {
         request.body.formData = unparsedBody.formData;
     }
     if (unparsedBody && unparsedBody.raw) {
-        let parsedRaw = '';
-        console.log('PARSING', unparsedBody.raw);
-        const decoder = new TextDecoder('utf-8');
-        parsedRaw = decodeURIComponent(String.fromCharCode.apply(null,
-                                      new Uint8Array(unparsedBody.raw[0].bytes)));
-
-        /*
-        for (const chunk in unparsedBody.raw){
-            let bytes = new Uint8Array(chunk.bytes);
-            console.log('bytes:', bytes);
-            parsedRaw += decoder.decode(bytes, {stream: true});
-        }*/
-        console.log('PARSED', parsedRaw);
+        let parsedRaw = decodeURIComponent(
+            String.fromCharCode.apply(
+                null,
+                new Uint8Array(unparsedBody.raw[0].bytes)
+            )
+        );
         request.body.raw = parsedRaw;
     }
 
@@ -108,7 +96,7 @@ const listenerBeforeRequest = (intercept) => {
     request.url = intercept.url;
     if (isComplete) {
         sendToApp(
-            1,
+            null,
             request.url,
             request.method,
             request.type,
