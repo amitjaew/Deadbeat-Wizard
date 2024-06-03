@@ -1,7 +1,9 @@
 <script>    
     import {onMount} from "svelte";
+    import beautify from 'json-beautify';
 
-    let value = "";
+    export let data;
+    const { capture } = data;
 
     // **NOTE:** Since `onMount` is only called on the client, we can just
     // make our import there. And assign to our Component's scope
@@ -11,11 +13,10 @@
     });
 
 
-    import { CodeBlock } from '@skeletonlabs/skeleton';
     import hljs from 'highlight.js/lib/core';
-    import yaml from 'highlight.js/lib/languages/yaml';
+    import json from 'highlight.js/lib/languages/json';
 
-    hljs.registerLanguage('yaml', yaml);
+    hljs.registerLanguage('json', json);
 
     // `highlight` takes the input code and returns the highlighted HTML markup
     const highlight = (code, syntax) => (
@@ -39,37 +40,96 @@
 
     let wordslists = DUMMY_WORDLISTS;
 
-    let header = `header-1:
-    header=''`;
-    let body = `body-1:
-    body=''`;
+    let header;
+    let body;
+
+    if (capture){
+        header = beautify(
+            capture.headers,
+            null,
+            2,
+            80
+        );
+        if (capture.body.raw){
+            try {
+                body = beautify(
+                    JSON.parse(capture.body.raw),
+                    null,
+                    2,
+                    80
+                );
+            } catch {
+                body = capture.body.raw;
+            }
+        }
+        else if (capture.body.formData) {
+            // Parse formdata...
+        }
+    }
+    else {
+        header = '';
+        body = '';
+    }
 
     let iterator = 1;
+    let editorViewMode = 'headers';
 </script>
 
 
 <div class='w-full h-full grid grid-cols-2  gap-3 p-1'>
-    <div class='w-full h-full grid grid-cols-1 grid-rows-2 gap-2 max-h-[calc(100vh-90px)]'>
-        <div class='overflow-auto rounded-lg'>
+    <div class='w-full h-full flex flex-col h-[calc(100vh-75px)]'>
+        <div class='btn-group variant-ghost w-full grid grid-cols-2 h-[40px] z-20'>
+            <button
+                class={`
+                    ${editorViewMode === 'headers' ? 'variant-ghost-tertiary' : ''}
+                    transition-all duration-700
+                `}
+                on:click={() => editorViewMode = 'headers' }
+            >
+                headers
+            </button>
+            <button
+                class={`
+                    ${editorViewMode === 'body' ? 'variant-ghost-tertiary' : ''}
+                    transition-all duration-700
+                `}
+                on:click={() => editorViewMode = 'body' }
+            >
+                Body
+            </button>
+        </div>
+        <div
+            class={`
+                ${editorViewMode === 'body' && 'hidden'}
+                overflow-auto rounded-lg h-[calc(100vh-100px)]
+                mt-1
+                `}
+        >
             {#if CodeJar}
-                <CodeJar bind:value={header} class="hljs h-full p-5" syntax="yaml" {highlight}/>
+                <CodeJar bind:value={header} class="hljs h-full p-5 text-sm" syntax="json" {highlight}/>
             {:else}
             <!--
                 **NOTE:** Normally the `CodeJar` Svelte handles fall through for us, and
                 renders / syntax highlights without an editor during SSR / non-JS enabled clients
             -->
-                <pre class='hljs h-full p-5'><code>{header}</code></pre>
+                <pre class='hljs h-full p-5 text-sm'><code>{header}</code></pre>
             {/if}
         </div>
-        <div class='overflow-auto rounded-lg'>
+        <div
+            class={`
+                ${editorViewMode === 'headers' && 'hidden'}
+                overflow-auto rounded-lg h-[calc(100vh-100px)]
+                mt-1
+                `}
+        >
             {#if CodeJar}
-                <CodeJar bind:value={body} class="hljs h-full p-5" syntax="yaml" {highlight}/>
+                <CodeJar bind:value={body} class="hljs h-full p-5 text-sm" syntax="json" {highlight}/>
             {:else}
             <!--
                 **NOTE:** Normally the `CodeJar` Svelte handles fall through for us, and
                 renders / syntax highlights without an editor during SSR / non-JS enabled clients
             -->
-                <pre class='hljs h-full p-5'><code>{body}</code></pre>
+                <pre class='hljs h-full p-5 text-sm'><code>{body}</code></pre>
             {/if}
         </div>
     </div>

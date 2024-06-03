@@ -1,20 +1,47 @@
 <script>
     export let data;
     const { captures } = data;
-
+    
+    import { onMount } from 'svelte';
     import { CodeBlock } from '@skeletonlabs/skeleton';
     import hljs from 'highlight.js/lib/core';
-    import yaml from 'highlight.js/lib/languages/yaml';
+    import json from 'highlight.js/lib/languages/json';
 
-    hljs.registerLanguage('yaml', yaml);
+    hljs.registerLanguage('json', json);
 
     let header = ' ';
     let body = ' ';
+    let beautify;
+
+    onMount( async () => {
+        let beautify_package = await import('json-beautify');
+        beautify = beautify_package.default;
+        console.log(beautify)
+    });
 
     const selectCapture = (capture) => {
-        if (!capture) return;
-        header = JSON.stringify(capture.headers);
-        body = JSON.stringify(capture.body);
+        if (!capture || !beautify) return;
+        header = beautify(
+            capture.headers,
+            null,
+            2,
+            80
+        );
+        if (capture.body.raw){
+            try {
+                body = beautify(
+                    JSON.parse(capture.body.raw),
+                    null,
+                    2,
+                    80
+                );
+            } catch {
+                body = capture.body.raw;
+            }
+        }
+        else if (capture.body.formData) {
+            // Parse formdata...
+        }
     };
 </script>
 
@@ -39,7 +66,7 @@
                     on:click={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        location.assign('/fuzzer');
+                        location.assign(`/fuzzer?capture_id=${req.id}`);
                     }}
                         class='btn variant-ghost-primary w-full h-full'>
                         Fuzz
@@ -51,10 +78,10 @@
     </div>
     <div class='h-full flex flex-col w-[45%] max-h-[calc(100vh-90px)]'>
         <div class='py-1 h-[50%]'>
-            <CodeBlock class='h-full overflow-scroll' language='yaml' code={header}/>
+            <CodeBlock class='h-full overflow-scroll' language='json' code={header}/>
         </div>
         <div class='py-1 h-[50%]'>
-            <CodeBlock class='h-full overflow-scroll' language='yaml' code={body}/>
+            <CodeBlock class='h-full overflow-scroll' language='json' code={body}/>
         </div>
     </div>
 </div>
