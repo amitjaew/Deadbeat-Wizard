@@ -101,7 +101,7 @@
         <div
             class={`
                 ${editorViewMode === 'body' && 'hidden'}
-                overflow-auto rounded-lg h-[calc(100vh-100px)]
+                overflow-auto rounded-lg h-[calc(100vh-120px)]
                 mt-1
                 `}
         >
@@ -118,7 +118,7 @@
         <div
             class={`
                 ${editorViewMode === 'headers' && 'hidden'}
-                overflow-auto rounded-lg h-[calc(100vh-100px)]
+                overflow-auto rounded-lg h-[calc(100vh-120px)]
                 mt-1
                 `}
         >
